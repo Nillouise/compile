@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -39,6 +40,13 @@ namespace compile
             {
                 this.code = code;
                 this.literal = literal;
+            }
+
+            public override string ToString()
+            {
+
+
+                return "(" + code.ToString() + "," + literal.ToString() + ")";
             }
         }
 
@@ -94,10 +102,10 @@ namespace compile
                 {
                     ungetchar();
                     return 2;
-                }else if(char.IsSymbol(ch))
+                }else if(char.IsSymbol(ch)||char.IsPunctuation(ch))
                 {
                     ungetchar();
-                    return 2;
+                    return 5;
                 }
 
                 return 0;
@@ -178,7 +186,7 @@ namespace compile
                             }
                             else
                             {
-                                state = 101;
+                                return 6;
                             }
 
                             break;
@@ -188,9 +196,11 @@ namespace compile
                             {
                                 if(ch=='"')
                                 { 
-                                    state = 100;
+                                    tokenList.Add(new token(4, literal));
+                                    return 0;
                                 }
-                            }else
+                            }
+                            else
                             {
                                 state = 2;
                             }
@@ -205,7 +215,8 @@ namespace compile
                                 state = 4;
                             else if (ch == '\'')
                             {
-                                state = 100;
+                                tokenList.Add(new token(4, literal));
+                                return 0;
                             }
                             else
                                 state = 6;
@@ -216,29 +227,30 @@ namespace compile
                             break;
                         case 5:
                             if (ch != '\'')
-                                state = 101;
+                            {
+                                tokenList.Add(new token(4, literal+'\''));
+                                return 6;
+                            }
                             else
                             {
                                 literal += ch;
-                                state = 100;
+                                tokenList.Add(new token(4, literal));
+                                return 0;
                             }
-                            break;
                         case 6:
                             if (ch != '\'')
-                                state = 101;
+                            {
+                                tokenList.Add(new token(4, literal+'\''));
+                                return 6;
+                            }
                             else
                             {
                                 literal += ch;
-                                state = 100;
+                                tokenList.Add(new token(4, literal));
+                                return 0;
                             }
-                            break;
                             
-                        case 100:
-                            tokenList.Add(new token(4, literal));
-                            return 0;
-                        case 101:
-                            tokenList.Add(new token(4, literal));
-                            return 6;
+                            
 
                         default:
                             break;
@@ -277,6 +289,7 @@ namespace compile
                                 literal += ch;
                             }else
                             {
+                                ungetchar();
                                 state = 100;
                             }
                             break;
@@ -356,31 +369,31 @@ namespace compile
                     get_nextchar(ref ch2);
                     if(ch2=='=')
                     {
-                        tokenList.Add(new token(5, ch.ToString() + ch2));
+                        tokenList.Add(new token(6, ch.ToString() + ch2));
                         return 0;
                     }else
                     {
                         if(ch==ch2 && "^!%*/".IndexOf(ch)<0)
                         {
-                            tokenList.Add(new token(5, ch.ToString() + ch2));
+                            tokenList.Add(new token(6, ch.ToString() + ch2));
                             return 0;
                         }
                         else
                         {
                             ungetchar();
-                            tokenList.Add(new token(5, ch.ToString() ));
+                            tokenList.Add(new token(6, ch.ToString() ));
                             return 0;
                         }
                     }
                 }else
                 {
-                    tokenList.Add(new token(5, ch.ToString()));
+                    tokenList.Add(new token(6, ch.ToString()));
                     return 0;
                 }
             }
             int error()
             {
-
+                errorMsg += "error in line " + lineIndex.ToString() + ",char " + charIndex.ToString() + ".\n";
 
                 return 0;
             }
@@ -390,7 +403,7 @@ namespace compile
             int lineIndex;
             int charIndex;
             string errorMsg = "";
-            List<token> tokenList;
+            List<token> tokenList = new List<token>();
             bool get_line(ref string receiveline)
             {
                 if(lineIndex<lines.Length)
@@ -409,6 +422,12 @@ namespace compile
                 if (lineIndex < lines.Length && charIndex< lines[lineIndex].Length)
                 {
                     receiveChar = lines[lineIndex][charIndex];
+                    if (receiveChar == ';')
+                    {
+                        int a = 0;
+                    }
+
+
                     charIndex++;
                     return true;
                 }
@@ -431,41 +450,51 @@ namespace compile
                 }
             }
 
-            string lex(string source)
+            public string lex(string source)
             {
                 lines = source.Split('\n');
-
+                lineIndex = 0;
+                charIndex = 0;
                 int state = 0;
-
-                switch (state)
+                while(state!=7)
                 {
-                    case 0:
-                        state = sort();
-                        break;
-                    case 1:
-                        state = recog_dig();
-                        break;
-                    case 2:
-                        state = recog_str();
-                        break;
-                    case 3:
-                        state = recog_id();
-                        break;
-                    case 4:
-                        state = hand_com();
-                        break;
-                    case 5:
-                        state = recog_del();
-                        break;
-                    case 6:
-                        state = error();
-                        break;
 
-                    default:
-                        break;
+                    switch (state)
+                    {
+                        case 0:
+                            state = sort();
+                            break;
+                        case 1:
+                            state = recog_dig();
+                            break;
+                        case 2:
+                            state = recog_str();
+                            break;
+                        case 3:
+                            state = recog_id();
+                            break;
+                        case 4:
+                            state = hand_com();
+                            break;
+                        case 5:
+                            state = recog_del();
+                            break;
+                        case 6:
+                            state = error();
+                            break;
+
+                        default:
+                            break;
+                    }
+                }
+                string r="";
+
+                foreach(var i in tokenList)
+                {
+                    r += i.ToString();
                 }
 
-                return "";
+                return r;
             }
 
 
@@ -477,7 +506,21 @@ namespace compile
 
         private void button_Click(object sender, RoutedEventArgs e)
         {
+            LexicalAnalysis lex = new LexicalAnalysis();
+            string r = lex.lex(textBox.Text);
+            textBox1.Text = r;
+        }
 
+        private void button1_Click(object sender, RoutedEventArgs e)
+        {
+            Microsoft.Win32.OpenFileDialog dialog = new Microsoft.Win32.OpenFileDialog();
+            dialog.Filter = "文本文件|*.cpp";
+            if (dialog.ShowDialog() == false)
+            {
+                return;
+            }
+            string s = File.ReadAllText(dialog.FileName, Encoding.GetEncoding("GB18030"));
+            textBox.Text = s;
         }
     }
 }
