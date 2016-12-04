@@ -5,14 +5,17 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:compile"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="593">
+        Title="MainWindow" Height="584" Width="593">
     <Grid>
         <TextBox x:Name="textBox" HorizontalAlignment="Left" Height="274" Margin="10,39,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="227"/>
-        <Label x:Name="label" Content="Label" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="89"/>
-        <Label x:Name="label1" Content="Label" HorizontalAlignment="Left" Margin="322,10,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="label" Content="源码" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="89"/>
+        <Label x:Name="label1" Content="词法分析" HorizontalAlignment="Left" Margin="322,10,0,0" VerticalAlignment="Top"/>
         <Button x:Name="button" Content="lex" HorizontalAlignment="Left" Margin="242,90,0,0" VerticalAlignment="Top" Width="75" Click="button_Click"/>
         <TextBox x:Name="textBox1" HorizontalAlignment="Left" Height="274" Margin="322,39,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="253"/>
         <Button x:Name="button1" Content="OpenFile" HorizontalAlignment="Left" Margin="162,13,0,0" VerticalAlignment="Top" Width="75" Click="button1_Click"/>
+        <TextBox x:Name="textBox2" HorizontalAlignment="Left" Height="175" Margin="0,347,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="575"/>
+        <Label x:Name="label2" Content="语法分析" HorizontalAlignment="Left" Margin="10,318,0,0" VerticalAlignment="Top" Width="76"/>
+        <Button x:Name="button2" Content="Grammer" HorizontalAlignment="Left" Margin="10,527,0,0" VerticalAlignment="Top" Width="75" Click="button2_Click"/>
 
     </Grid>
 </Window>

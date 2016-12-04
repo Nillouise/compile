@@ -465,6 +465,7 @@ namespace compile
 
             foreach (var i in tokenList)
             {
+                i.trans();
                 r += i.ToString();
             }
 
@@ -480,7 +481,8 @@ namespace compile
         delimiter,
         constant,
         dataType,
-        zifu;
+        zifu,
+        runout
     }
     public class token
     {
@@ -498,6 +500,21 @@ namespace compile
 
 
             return "(" + code.ToString() + "," + literal.ToString() + ")";
+        }
+        public void trans()
+        {
+             if (char.IsPunctuation(literal[0]) || char.IsSeparator(literal[0]))
+                codeType = CodeType.delimiter;
+            if (literal.Contains("'") || literal.Contains("\""))
+                codeType = CodeType.zifu;
+            else if (char.IsLetter(literal[0]))
+                codeType = CodeType.identy;
+            else if (char.IsDigit(literal[0]))
+                codeType = CodeType.constant;
+
+            if (literal == "int" || literal == "double" || literal == "long" || literal == "char" || literal == "float" || literal == "void")
+                codeType = CodeType.dataType;
+
         }
     }
     /// <summary>
@@ -535,6 +552,14 @@ namespace compile
             }
             string s = File.ReadAllText(dialog.FileName, Encoding.GetEncoding("GB18030"));
             textBox.Text = s;
+        }
+
+        private void button2_Click(object sender, RoutedEventArgs e)
+        {
+            LexicalAnalysis lex = new LexicalAnalysis();
+            lex.lex(textBox.Text);
+            Grammer gra=new Grammer();
+            textBox2.Text = gra.run(lex);
         }
     }
 }

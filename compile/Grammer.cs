@@ -16,7 +16,8 @@ namespace compile
                 match(curToken.codeType == CodeType.dataType);
                 match(curToken.codeType == CodeType.identy);
                 match(curToken.literal == "(");
-                VnXingCan();
+                if(curToken.codeType==CodeType.dataType)
+                   VnXingCan();
                 match(curToken.literal == ")");
                 VnBlockCode();
             }
@@ -27,15 +28,24 @@ namespace compile
         }
         void VnXingCan()
         {
-            if(curToken.codeType==CodeType.dataType)
+            if (curToken.codeType == CodeType.dataType)
             {
                 match(curToken.codeType == CodeType.dataType);
                 match(curToken.codeType == CodeType.identy);
-                if(curToken.literal==",")
-                {
-                    match(curToken.literal == ",");
-                    VnXingCan();
-                }
+                VnXingCan();
+            } else if (curToken.literal == ",")
+            {
+                match(curToken.literal == ",");
+                match(curToken.codeType == CodeType.dataType);
+                match(curToken.codeType == CodeType.identy);
+                VnXingCan();
+            } else if (curToken.literal == ")")
+            {
+                return;
+            }
+            else
+            {
+                error();
             }
         }
         void VnBlockCode()
@@ -44,12 +54,16 @@ namespace compile
             {
                 match(curToken.literal == "{");
                 VnMultiSentence();
-                match(curToken.literal == "}");
+                 match(curToken.literal == "}");
+            }else
+            {
+                error();
             }
         }
         void VnMultiSentence()
         {
-            if(curToken.codeType==CodeType.constant || curToken.codeType == CodeType.dataType|| curToken.codeType == CodeType.identy)
+            if(runout==0)
+            if(curToken.codeType==CodeType.constant || curToken.codeType == CodeType.dataType|| curToken.codeType == CodeType.identy )
             {
                 VnSentence();
                 VnMultiSentence();
@@ -70,7 +84,7 @@ namespace compile
             }
             else if(curToken.literal=="if" || curToken.literal=="while")
             {
-
+                VnJudgeExpression();
             }
             else
             {
@@ -79,7 +93,7 @@ namespace compile
         }
         void VnShiCan()
         {
-            if( curToken.literal!=")")
+            if( curToken.codeType==CodeType.identy||curToken.codeType==CodeType.constant||curToken.codeType==CodeType.zifu)
             {
                 VnExpression();
                 if (curToken.literal == ",")
@@ -87,7 +101,6 @@ namespace compile
                     match(curToken.literal == ",");
                     VnShiCan();
                 }
-
             }
         }
 
@@ -138,7 +151,10 @@ namespace compile
                 if ("+-*/".IndexOf(curToken.literal) >= 0)
                 {
                     match("+-*/".IndexOf(curToken.literal) >= 0);
-                    VnExpression();
+                    if (curToken.codeType == CodeType.identy || curToken.codeType == CodeType.constant || curToken.codeType == CodeType.zifu)
+                        VnExpression();
+                    else
+                        error();
                 }else if("><".IndexOf(curToken.literal) >= 0)
                 {
                     match("><".IndexOf(curToken.literal) >= 0);
@@ -218,30 +234,55 @@ namespace compile
         string returnMsg = "";
         LexicalAnalysis lex;
         int tokenindex = 0;
+        int runout = 0;
         bool getnexttoken()
         {
             if(tokenindex< lex.tokenList.Count)
             {
                 curToken = lex.tokenList[tokenindex];
+                tokenindex++;
+                if (tokenindex == 17)
+                {
+                    int a = 0;
+                }
+
                 return true;
             }
+            curToken.codeType = CodeType.runout;
+            curToken.literal = "";
             return false;
         }
         void error()
         {
-
+            returnMsg += "Token " + tokenindex.ToString() + curToken.ToString()+ " error\n";
         }
         void match(bool ex)
         {
             if (ex)
-                getnexttoken();
-            else error();
+            {
+                if (runout == 1)
+                    error();
+                if (!getnexttoken())
+                {
+                    runout = 1;
+                }
+            }
+            else
+            {
+                error();
+            }
         }
 
         public string run(LexicalAnalysis lexical )
         {
+            lex = lexical;
+            tokenindex = 0;
+            returnMsg = "";
+            getnexttoken();
+            runout = 0;
+            VnFunction();
 
-            return  "";
+            return  returnMsg;
         }
     }
 }
